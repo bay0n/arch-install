@@ -1,0 +1,20 @@
+general {
+    colors = true
+    interval = 5
+}
+
+order += "cpu_usage"
+order += "memory"
+order += "time"
+
+cpu_usage {
+    format = "CPU: %usage"
+}
+
+memory {
+    format = "Mem: %used/%total"
+}
+
+time {
+    format = "%Y-%m-%d %H:%M"
+}
