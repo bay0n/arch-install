@@ -6,7 +6,7 @@ echo "🚀 Starting Arch i3 setup..."
 # -----------------------------
 # Variables
 # -----------------------------
-REPO_DIR="$HOME/.arch-i3"
+REPO_DIR="$HOME/arch-install"
 TIMESTAMP=$(date +%s)
 BACKUP_DIR="$HOME/.config_backup_$TIMESTAMP"
 
@@ -18,12 +18,8 @@ WALLPAPER_DEST="$HOME/Pictures/wallpapers"
 # Repo backup in Pictures
 REPO_BACKUP_DEST="$HOME/Pictures/arch-install"
 
-# -----------------------------
-# Clone repo if not already cloned
-# -----------------------------
-if [ ! -d "$REPO_DIR" ]; then
-    git clone git@github.com:YOURUSERNAME/arch-i3.git "$REPO_DIR"
-fi
+#install the fliping rpo nerddddd
+
 
 cd "$REPO_DIR"
 
