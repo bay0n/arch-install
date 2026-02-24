@@ -10,16 +10,18 @@ REPO_DIR="$HOME/arch-install"
 TIMESTAMP=$(date +%s)
 BACKUP_DIR="$HOME/.config_backup_$TIMESTAMP"
 
-# Dotfiles and wallpapers
 DOTFILES_DIR="$REPO_DIR/dotfiles"
 WALLPAPER_SRC="$DOTFILES_DIR/wallpapers"
 WALLPAPER_DEST="$HOME/Pictures/wallpapers"
 
-# Repo backup in Pictures
 REPO_BACKUP_DEST="$HOME/Pictures/arch-install"
 
-#install the fliping rpo nerddddd
-
+# Ensure repo exists
+if [ ! -d "$REPO_DIR" ]; then
+    echo "Repository not found! Please clone it first:"
+    echo "git clone https://github.com/bay0n/arch-install.git $REPO_DIR"
+    exit 1
+fi
 
 cd "$REPO_DIR"
 
@@ -38,7 +40,7 @@ fi
 sudo pacman -Syu --noconfirm
 
 # -----------------------------
-# Install core packages
+# Install official packages
 # -----------------------------
 sudo pacman -S --needed --noconfirm \
     xorg-server \
@@ -63,7 +65,6 @@ sudo pacman -S --needed --noconfirm \
     git \
     base-devel \
     zed \
-    catppuccin-gtk-theme \
     papirus-icon-theme \
     lxappearance
 
@@ -87,6 +88,7 @@ fi
 # Install AUR packages
 # -----------------------------
 yay -S --needed --noconfirm \
+    catppuccin-gtk-theme \
     spotify \
     lunar-client \
     firedragon-bin \
@@ -121,7 +123,7 @@ echo "Copying entire repo to $REPO_BACKUP_DEST..."
 rsync -av --progress "$REPO_DIR/" "$REPO_BACKUP_DEST/"
 
 # -----------------------------
-# Set GTK theme to Catppuccin Mocha
+# GTK theme setup
 # -----------------------------
 mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
 
