@@ -1,30 +1,49 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Installing your private i3 setup..."
+echo "🚀 Starting Arch i3 setup..."
 
+# -----------------------------
+# Variables
+# -----------------------------
 REPO_DIR="$HOME/.arch-i3"
 TIMESTAMP=$(date +%s)
 BACKUP_DIR="$HOME/.config_backup_$TIMESTAMP"
 
+# Dotfiles and wallpapers
+DOTFILES_DIR="$REPO_DIR/dotfiles"
+WALLPAPER_SRC="$DOTFILES_DIR/wallpapers"
+WALLPAPER_DEST="$HOME/Pictures/wallpapers"
+
+# Repo backup in Pictures
+REPO_BACKUP_DEST="$HOME/Pictures/arch-install"
+
+# -----------------------------
 # Clone repo if not already cloned
+# -----------------------------
 if [ ! -d "$REPO_DIR" ]; then
-    git clone https://github.com/YOURNAME/arch-i3.git "$REPO_DIR"
+    git clone git@github.com:YOURUSERNAME/arch-i3.git "$REPO_DIR"
 fi
 
 cd "$REPO_DIR"
 
-# Enable multilib for Steam (if not already enabled)
+# -----------------------------
+# Enable multilib
+# -----------------------------
 if ! grep -q "^\[multilib\]" /etc/pacman.conf; then
     echo "Enabling multilib..."
     sudo sed -i '/#\[multilib\]/,/Include/s/^#//' /etc/pacman.conf
     sudo pacman -Syu --noconfirm
 fi
 
+# -----------------------------
 # Update system
+# -----------------------------
 sudo pacman -Syu --noconfirm
 
+# -----------------------------
 # Install core packages
+# -----------------------------
 sudo pacman -S --needed --noconfirm \
     xorg-server \
     xorg-xinit \
@@ -46,12 +65,20 @@ sudo pacman -S --needed --noconfirm \
     noto-fonts \
     ttf-dejavu \
     git \
-    base-devel
+    base-devel \
+    zed \
+    catppuccin-gtk-theme \
+    papirus-icon-theme \
+    lxappearance
 
+# -----------------------------
 # Enable NetworkManager
+# -----------------------------
 sudo systemctl enable NetworkManager
 
+# -----------------------------
 # Install yay if missing
+# -----------------------------
 if ! command -v yay &> /dev/null; then
     git clone https://aur.archlinux.org/yay.git
     cd yay
@@ -60,23 +87,65 @@ if ! command -v yay &> /dev/null; then
     rm -rf yay
 fi
 
+# -----------------------------
 # Install AUR packages
-yay -S --noconfirm spotify lunar-client firedragon discord
+# -----------------------------
+yay -S --needed --noconfirm \
+    spotify \
+    lunar-client \
+    firedragon-bin \
+    discord \
+    roficalc
 
-# Backup existing config if present
+# -----------------------------
+# Backup existing config
+# -----------------------------
 if [ -d "$HOME/.config" ]; then
     echo "Backing up existing config to $BACKUP_DIR"
     mkdir -p "$BACKUP_DIR"
     cp -r "$HOME/.config" "$BACKUP_DIR/"
 fi
 
-# Copy dotfiles safely (no overwrite without backup)
-rsync -a --backup dotfiles/ "$HOME/"
+# -----------------------------
+# Copy dotfiles
+# -----------------------------
+rsync -a --backup "$DOTFILES_DIR/" "$HOME/"
 
-# Ensure wallpaper directory exists
-mkdir -p "$HOME/Pictures/wallpapers"
+# -----------------------------
+# Copy wallpapers
+# -----------------------------
+mkdir -p "$WALLPAPER_DEST"
+if [ -d "$WALLPAPER_SRC" ]; then
+    echo "Copying wallpapers from dotfiles to $WALLPAPER_DEST..."
+    rsync -av --progress "$WALLPAPER_SRC/" "$WALLPAPER_DEST/"
+fi
 
+# Backup entire repo in Pictures
+echo "Copying entire repo to $REPO_BACKUP_DEST..."
+rsync -av --progress "$REPO_DIR/" "$REPO_BACKUP_DEST/"
+
+# -----------------------------
+# Set GTK theme to Catppuccin Mocha
+# -----------------------------
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
+
+cat << EOF > "$HOME/.config/gtk-3.0/settings.ini"
+[Settings]
+gtk-theme-name=Catppuccin-Mocha-Standard-Blue-Dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-font-name=DejaVu Sans 10
+EOF
+
+cat << EOF > "$HOME/.config/gtk-4.0/settings.ini"
+[Settings]
+gtk-theme-name=Catppuccin-Mocha-Standard-Blue-Dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-font-name=DejaVu Sans 10
+EOF
+
+# -----------------------------
 # Smart monitor auto-detect script
+# -----------------------------
 mkdir -p "$HOME/.screenlayout"
 
 cat << 'EOF' > "$HOME/.screenlayout/auto.sh"
@@ -96,5 +165,8 @@ EOF
 
 chmod +x "$HOME/.screenlayout/auto.sh"
 
-echo "✅ Installation complete."
+# -----------------------------
+# Done
+# -----------------------------
+echo "✅ Installation complete!"
 echo "Reboot and run: startx"
